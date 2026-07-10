@@ -266,17 +266,16 @@ mod fast_parallel {
 
     use miden_assembly::{Assembler, DefaultSourceManager};
     use miden_core::{
+        Word,
         mast::{
             BasicBlockNodeBuilder, ExternalNodeBuilder, JoinNodeBuilder, MastForest, MastNodeExt,
         },
         operations::Operation,
         proof::{ExecutionProof, HashFunction},
-        Word,
     };
     use miden_processor::{
         DefaultHost, ExecutionOptions, FastProcessor, HostLibrary, StackInputs,
-        advice::AdviceInputs,
-        trace::build_trace,
+        advice::AdviceInputs, trace::build_trace,
     };
     use miden_prover::{
         ProvingOptions, TraceProvingInputs, config, prove_from_trace_sync, prove_stark,
