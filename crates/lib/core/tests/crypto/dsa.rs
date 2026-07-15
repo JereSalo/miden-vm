@@ -8,6 +8,7 @@ use miden_crypto::{
     dsa::ecdsa_k256_keccak::{PublicKey, Signature, SigningKey},
 };
 use miden_precompiles::K1Scalar;
+use miden_precompiles_prover::{HashFunction, prove_deferred_state, session::verify_deferred};
 use miden_processor::{
     DefaultHost, ExecutionError, ExecutionOptions, ExecutionOutput, FastProcessor, StackInputs,
     advice::AdviceInputs,
@@ -15,9 +16,9 @@ use miden_processor::{
 use miden_utils_testing::crypto::Poseidon2;
 use rand_chacha::{ChaCha20Rng, rand_core::SeedableRng};
 
-const VERIFY_EXPECTED_CYCLES: u64 = 1_425;
-const VERIFY_EXPECTED_WIRE_ENTRIES: usize = 36;
-const VERIFY_EXPECTED_WIRE_BYTES: usize = 2_455;
+const VERIFY_EXPECTED_CYCLES: u64 = 2_904;
+const VERIFY_EXPECTED_WIRE_ENTRIES: usize = 68;
+const VERIFY_EXPECTED_WIRE_BYTES: usize = 4_296;
 
 #[test]
 fn core_ecdsa_k256_keccak_verify_accepts_valid_signature() {
@@ -29,6 +30,26 @@ fn core_ecdsa_k256_keccak_verify_accepts_valid_signature() {
     let wire = output.deferred_state.to_wire().expect("deferred state must encode to wire");
     assert_eq!(wire.entries.len(), VERIFY_EXPECTED_WIRE_ENTRIES);
     assert_eq!(wire.to_bytes().len(), VERIFY_EXPECTED_WIRE_BYTES);
+}
+
+/// Full round trip through the real precompile side prover: proves the GLV-decomposed MSM claim,
+/// the phi(G)/phi(Q) endomorphism certs, and the split recompose certs the deferred state above
+/// only checked structurally, then verifies the resulting STARK proof against the same root the
+/// main VM committed.
+#[test]
+fn core_ecdsa_k256_keccak_verify_glv_claim_proves_and_verifies() {
+    let fixture = valid_fixture();
+    let output = run_verify(&fixture).expect("valid core ECDSA K256/Keccak signature must verify");
+
+    let proof = prove_deferred_state(&output.deferred_state, HashFunction::Blake3_256)
+        .expect("the GLV-decomposed deferred claims must be provable");
+    let verified_root =
+        verify_deferred(&proof).expect("the GLV-decomposed deferred proof must verify");
+    assert_eq!(
+        verified_root,
+        output.deferred_state.root(),
+        "verified root must match the root the main VM committed",
+    );
 }
 
 #[test]
@@ -51,7 +72,14 @@ fn core_ecdsa_k256_keccak_verify_accepts_high_s_untrusted_witness() {
         "miden-crypto Rust verification must reject high-s",
     );
 
-    set_s(&mut fixture, high_s);
+    // Regenerate the full advice (not just the s limbs): the GLV witness embedded in
+    // `encode_signature`'s output is derived from s, so patching s in place alone would leave a
+    // stale witness for the new value.
+    fixture.advice = ecdsa_k256_keccak::encode_signature(
+        &fixture.public_key,
+        &high_s_signature,
+        fixture.message,
+    );
     run_verify(&fixture)
         .expect("high-s remains an equivalent witness when signature advice is not committed");
 }
@@ -170,7 +198,7 @@ fn valid_fixture() -> Fixture {
     );
 
     let pk_comm = ecdsa_k256_keccak::public_key_commitment(&public_key);
-    let advice = ecdsa_k256_keccak::encode_signature(&public_key, &signature);
+    let advice = ecdsa_k256_keccak::encode_signature(&public_key, &signature, message);
 
     Fixture {
         public_key,
