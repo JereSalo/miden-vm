@@ -708,7 +708,7 @@ checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
 name = "miden-assembly"
-version = "0.25.5"
+version = "0.25.6"
 dependencies = [
  "log",
  "miden-assembly-syntax",
@@ -723,7 +723,7 @@ dependencies = [
 
 [[package]]
 name = "miden-assembly-syntax"
-version = "0.25.5"
+version = "0.25.6"
 dependencies = [
  "log",
  "miden-assembly-syntax-cst",
@@ -742,7 +742,7 @@ dependencies = [
 
 [[package]]
 name = "miden-assembly-syntax-cst"
-version = "0.25.5"
+version = "0.25.6"
 dependencies = [
  "miden-debug-types",
  "miden-rowan",
@@ -752,7 +752,7 @@ dependencies = [
 
 [[package]]
 name = "miden-core"
-version = "0.25.5"
+version = "0.25.6"
 dependencies = [
  "derive_more",
  "log",
@@ -834,7 +834,7 @@ dependencies = [
 
 [[package]]
 name = "miden-debug-types"
-version = "0.25.5"
+version = "0.25.6"
 dependencies = [
  "memchr",
  "miden-crypto",
@@ -916,7 +916,7 @@ dependencies = [
 
 [[package]]
 name = "miden-mast-package"
-version = "0.25.5"
+version = "0.25.6"
 dependencies = [
  "log",
  "miden-assembly-syntax",
@@ -964,7 +964,7 @@ dependencies = [
 
 [[package]]
 name = "miden-package-registry"
-version = "0.25.5"
+version = "0.25.6"
 dependencies = [
  "miden-assembly-syntax",
  "miden-core",
@@ -978,7 +978,7 @@ dependencies = [
 
 [[package]]
 name = "miden-project"
-version = "0.25.5"
+version = "0.25.6"
 dependencies = [
  "miden-assembly-syntax",
  "miden-core",
@@ -1035,7 +1035,7 @@ dependencies = [
 
 [[package]]
 name = "miden-utils-core-derive"
-version = "0.25.5"
+version = "0.25.6"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1044,7 +1044,7 @@ dependencies = [
 
 [[package]]
 name = "miden-utils-diagnostics"
-version = "0.25.5"
+version = "0.25.6"
 dependencies = [
  "miden-debug-types",
  "miden-miette",
@@ -1053,7 +1053,7 @@ dependencies = [
 
 [[package]]
 name = "miden-utils-indexing"
-version = "0.25.5"
+version = "0.25.6"
 dependencies = [
  "miden-crypto",
  "proptest",
@@ -1063,7 +1063,7 @@ dependencies = [
 
 [[package]]
 name = "miden-utils-sync"
-version = "0.25.5"
+version = "0.25.6"
 dependencies = [
  "lock_api",
  "loom",
@@ -1441,9 +1441,9 @@ dependencies = [
 
 [[package]]
 name = "portable-atomic"
-version = "1.13.1"
+version = "1.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c33a9471896f1c69cecef8d20cbe2f7accd12527ce60845ff44c153bb2a21b49"
+checksum = "3d20d5497ef88037a52ff98267d066e7f11fcc5e99bbfbd58a42336193aacec3"
 
 [[package]]
 name = "ppv-lite86"
