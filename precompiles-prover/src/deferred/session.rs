@@ -16,14 +16,14 @@ use crate::{
     transcript::poseidon2::P2Digest,
 };
 
-/// Picks [`translate_ec_msm`](DeferredSessionBuilder::translate_ec_msm)'s
-/// joint-wNAF window from an MSM claim's widest scalar: `w = 5` (digits odd,
-/// `|d| < 2^{w-1}`, `2^{w-2}` odd multiples per base) for full-width
-/// (~256-bit) scalars, such as the classic 2-base ECDSA MSM; `w = 4` for
-/// GLV's ~128-bit halves, `joint_wnaf`'s documented sweet spot at that width.
-fn msm_wnaf_window(max_scalar_bits: usize) -> usize {
-    if max_scalar_bits <= 128 { 4 } else { 5 }
-}
+/// wNAF window for [`translate_ec_msm`](DeferredSessionBuilder::translate_ec_msm)'s joint-wNAF
+/// addition chain (digits odd, `|d| < 2^{w-1}`, `2^{w-2}` odd multiples per base). A smaller window
+/// suits GLV's ~128-bit halves in isolation, but `translate_ec_msm` now caches a repeating base's
+/// table across the whole batch ([`Self::wnaf_tables`](DeferredSessionBuilder::wnaf_tables)), which
+/// makes the one-time table-build cost a wash and leaves the ladder's per-signature digit density
+/// as the dominant recurring cost — `w = 5` keeps that density low for both the classic 2-base MSM
+/// and GLV's 4-base one.
+const MSM_WNAF_WINDOW: usize = 5;
 
 pub(crate) struct DeferredSession {
     pub(crate) session: Session,
@@ -281,13 +281,14 @@ impl<'a> DeferredSessionBuilder<'a> {
         // `joint_wnaf`'s per-column cost is linear in the term count (unlike
         // Straus's 2^k subset-sum table), so an arbitrary-arity pair-list
         // never needs a term-count cap here.
-        let w = msm_wnaf_window(expr_terms.iter().map(|(_, s)| s.bit_len()).max().unwrap_or(0));
         for (base, _) in &expr_terms {
-            self.ensure_wnaf_table(base, w);
+            self.ensure_wnaf_table(base, MSM_WNAF_WINDOW);
         }
         let table_terms: Vec<(&strategies::WnafTable, U256)> = expr_terms
             .iter()
-            .map(|(base, scalar)| (self.wnaf_tables.get(&(base.point, w)).unwrap(), *scalar))
+            .map(|(base, scalar)| {
+                (self.wnaf_tables.get(&(base.point, MSM_WNAF_WINDOW)).unwrap(), *scalar)
+            })
             .collect();
         let expr = strategies::joint_wnaf_with_tables(&mut self.session, &table_terms);
 
