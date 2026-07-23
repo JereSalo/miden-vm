@@ -6,8 +6,11 @@
 
 use alloc::{collections::BTreeSet, vec::Vec};
 
-use super::{EmptySubtreeRoots, InnerNode, InnerNodeInfo, NodeIndex, NodeMutation, SMT_DEPTH};
-use crate::{Word, merkle::smt::full::concurrent::SUBTREE_DEPTH};
+// Imports use paths that resolve under both parents of this module: `large` (with the
+// `concurrent` feature) and `smt` directly (without it).
+use crate::Word;
+use crate::merkle::smt::{InnerNode, NodeMutation, SMT_DEPTH, SUBTREE_DEPTH};
+use crate::merkle::{EmptySubtreeRoots, InnerNodeInfo, NodeIndex};
 
 mod error;
 pub use error::SubtreeError;

@@ -350,7 +350,7 @@ impl Smt {
 // ================================================================================================
 
 /// A subtree is of depth 8.
-pub(in crate::merkle::smt) const SUBTREE_DEPTH: u8 = 8;
+pub(in crate::merkle::smt) use crate::merkle::smt::SUBTREE_DEPTH;
 
 /// A depth-8 subtree contains 256 "columns" that can possibly be occupied.
 pub(in crate::merkle::smt) const COLS_PER_SUBTREE: u64 = u64::pow(2, SUBTREE_DEPTH as u32);

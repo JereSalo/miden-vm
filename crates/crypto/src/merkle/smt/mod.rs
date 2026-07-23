@@ -16,8 +16,19 @@ use crate::{
 mod full;
 pub use full::{MAX_LEAF_ENTRIES, SMT_DEPTH, Smt, SmtLeaf, SmtLeafError, SmtProof, SmtProofError};
 
+/// Depth of one packed subtree: subtrees store the inner nodes of 8 SMT levels.
+pub(in crate::merkle::smt) const SUBTREE_DEPTH: u8 = 8;
+
 #[cfg(feature = "concurrent")]
 mod large;
+// The packed subtree representation is part of the forest backend API surface, so it must be
+// available to external backend implementations that do not enable `concurrent`. When `large`
+// is compiled the module comes from there; otherwise it is compiled standalone.
+#[cfg(not(feature = "concurrent"))]
+#[path = "large/subtree/mod.rs"]
+mod subtree;
+#[cfg(not(feature = "concurrent"))]
+pub use subtree::{Subtree, SubtreeError};
 #[cfg(feature = "internal")]
 pub use full::concurrent::{SubtreeLeaf, build_subtree_for_bench};
 #[cfg(feature = "concurrent")]
